@@ -18,9 +18,8 @@ using std::placeholders::_1;
 
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
-const std::string EEF_FRAME_ID = "panda_hand";
-const std::string BASE_FRAME_ID = "panda_link0";
 const std::string ACCEL_TOPIC = "/controller/accel_cmds";
+const std::string BASE_FRAME_ID = "base_link";
 
 typedef Eigen::Vector3d Vec3;
 
@@ -43,6 +42,7 @@ public:
   Controller(const rclcpp::NodeOptions& options)
   : Node("controller", options), frame_to_publish(BASE_FRAME_ID)
   {
+    RCLCPP_INFO(get_logger(), "STARTED %d", 4);
     twist_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
     collision_pub =
       this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", rclcpp::SystemDefaultsQoS());
@@ -83,8 +83,8 @@ public:
 
       collision_object.primitives.push_back(table_1);
       collision_object.primitive_poses.push_back(table_1_pose);
-      collision_object.primitives.push_back(table_2);
-      collision_object.primitive_poses.push_back(table_2_pose);
+      // collision_object.primitives.push_back(table_2);
+      // collision_object.primitive_poses.push_back(table_2_pose);
       collision_object.operation = collision_object.ADD;
 
       moveit_msgs::msg::PlanningSceneWorld psw;
