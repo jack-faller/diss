@@ -22,30 +22,27 @@ USER $USERNAME
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 ADD ./ws_$ROS_DISTRO/src /src-for-rosdep
 SHELL ["/bin/bash", "-c"]
-# Seem not to be needed.
-# RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-# RUN colcon mixin update default
-USER $USERNAME
-# this asks you to sudo rosdep fix-permissions' and invoke 'rosdep update
-RUN rosdep update \
-	&& rosdep install -r --from-paths /src-for-rosdep --rosdistro $ROS_DISTRO -y
 USER root
-RUN addgroup realtime
-RUN usermod -a -G realtime $USERNAME
-RUN echo "@realtime soft rtprio 99" >> /etc/security/limits.conf \
-	echo "@realtime soft priority 99" >> /etc/security/limits.conf \
-	echo "@realtime soft memlock 102400" >> /etc/security/limits.conf \
-	echo "@realtime hard rtprio 99" >> /etc/security/limits.conf \
-	echo "@realtime hard priority 99" >> /etc/security/limits.conf \
-	echo "@realtime hard memlock 102400" >> /etc/security/limits.conf
+RUN addgroup realtime \
+    && usermod -a -G realtime $USERNAME \
+    && echo "@realtime soft rtprio 99" >> /etc/security/limits.conf \
+	&& echo "@realtime soft priority 99" >> /etc/security/limits.conf \
+	&& echo "@realtime soft memlock 102400" >> /etc/security/limits.conf \
+	&& echo "@realtime hard rtprio 99" >> /etc/security/limits.conf \
+	&& echo "@realtime hard priority 99" >> /etc/security/limits.conf \
+	&& echo "@realtime hard memlock 102400" >> /etc/security/limits.conf
 
 USER $USERNAME
 # Then to build, run 'colcon build --mixin release' in /proj/ws/src
-RUN echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
-RUN echo "export ROS_DISTRO=$ROS_DISTRO" >> ~/.bashrc
-RUN echo 'source /proj/ws_$ROS_DISTRO/src/install/setup.bash' >> ~/.bashrc
+RUN echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc \
+    && echo "export ROS_DISTRO=$ROS_DISTRO" >> ~/.bashrc \
+    && echo 'source /proj/ws_$ROS_DISTRO/install/setup.bash' >> ~/.bashrc
+RUN rosdep update \
+	&& rosdep install -r --from-paths /src-for-rosdep --rosdistro $ROS_DISTRO -y
+# RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+# RUN colcon mixin update default
 # TODO: specify this as dependency with rosdep/catkin.
-RUN sudo apt-get install -y ros-$ROS_DISTRO-ur ros-$ROS_DISTRO-rqt-controller-manager ros-$ROS_DISTRO-ros2controlcli ros-$ROS_DISTRO-ros2controlcli libeigen3-dev
+RUN sudo apt-get install -y qtwayland5 ros-$ROS_DISTRO-ur ros-$ROS_DISTRO-rqt-controller-manager ros-$ROS_DISTRO-ros2controlcli ros-$ROS_DISTRO-ros2controlcli libeigen3-dev
 ENV SHELL /bin/bash
 
 # ********************************************************

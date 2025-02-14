@@ -40,8 +40,11 @@ namespace project
   Vec3 p = {};
 public:
   Controller(const rclcpp::NodeOptions& options)
-  : Node("controller", options), frame_to_publish(BASE_FRAME_ID)
+  : Node("controller", options)
   {
+    this->declare_parameter("frame", rclcpp::PARAMETER_STRING);
+    frame_to_publish = this->get_parameter("frame").as_string();
+
     RCLCPP_INFO(get_logger(), "STARTED %d", 4);
     twist_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
     collision_pub =
@@ -60,7 +63,7 @@ public:
       rclcpp::sleep_for(3s);
       // Create collision object, in the way of servoing
       moveit_msgs::msg::CollisionObject collision_object;
-      collision_object.header.frame_id = BASE_FRAME_ID;
+      collision_object.header.frame_id = frame_to_publish;
       collision_object.id = "box";
 
       shape_msgs::msg::SolidPrimitive table_1;

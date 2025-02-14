@@ -6,7 +6,7 @@ from launch_ros.actions import Node, ComposableNodeContainer
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.descriptions import ComposableNode
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import (
     Command,
     FindExecutable,
@@ -14,6 +14,7 @@ from launch.substitutions import (
     PathJoinSubstitution,
     OrSubstitution,
 )
+from launch_param_builder import ParameterBuilder
 
 def get_robot_description():
     joint_limit_params = PathJoinSubstitution(
@@ -96,19 +97,45 @@ def get_robot_description_semantic():
     }
     return robot_description_semantic
 
-
 def generate_launch_description():
-    robot_description = get_robot_description()
-    robot_description_semantic = get_robot_description_semantic()
-
-    # Get parameters for the Servo node
-    servo_yaml = load_yaml("ur_moveit_config", "config/ur_servo.yaml")
-    servo_params = {"moveit_servo": servo_yaml}
+    # arm_type = LaunchConfiguration("arm_type")
+    # arm_type_arg = DeclareLaunchArgument("arm_type", default="ur3e")
+    # arm_type = "panda"
+    arm_type = "ur3e"
+    moveit_panda_config = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .robot_description(file_path="config/panda.urdf.xacro")
+        .to_moveit_configs())
+    if arm_type == "ur3e":
+        frame = "base_link"
+        robot_description = get_robot_description()
+        robot_description_semantic = get_robot_description_semantic()
+        # Get parameters for the Servo node
+        servo_yaml = load_yaml("ur_moveit_config", "config/ur_servo.yaml")
+        servo_params = {"moveit_servo": servo_yaml}
+        rviz_config_file = PathJoinSubstitution(
+            [FindPackageShare("ur_moveit_config"), "rviz", "view_robot.rviz"]
+        )
+        ros2_controllers_path = (
+            get_package_share_directory("ur_moveit_config") + "/config/controllers.yaml"
+        )
+    elif arm_type == "panda":
+        frame = "panda_link0"
+        robot_description = moveit_panda_config.robot_description
+        robot_description_semantic = moveit_panda_config.robot_description_semantic
+        servo_params = {
+            "moveit_servo": ParameterBuilder("moveit_servo")
+                .yaml("config/panda_simulated_config.yaml")
+                .to_dict() }
+        rviz_config_file = (
+            get_package_share_directory("moveit_servo") + "/config/demo_rviz_config.rviz"
+        )
+        ros2_controllers_path = (
+            get_package_share_directory("moveit_resources_panda_moveit_config")
+            + "/config/ros2_controllers.yaml"
+        )
 
     # RViz
-    rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare("ur_moveit_config"), "rviz", "view_robot.rviz"]
-    )
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -121,10 +148,6 @@ def generate_launch_description():
         ],
     )
 
-    # ros2_control using FakeSystem as hardware
-    ros2_controllers_path = (
-        get_package_share_directory("ur_moveit_config") + "/config/controllers.yaml"
-    )
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -147,11 +170,11 @@ def generate_launch_description():
         ],
     )
 
-    # panda_arm_controller_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["panda_arm_controller", "-c", "/controller_manager"],
-    # )
+    panda_arm_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+    )
 
     # Launch as much as possible in components
     container = ComposableNodeContainer(
@@ -160,7 +183,20 @@ def generate_launch_description():
         package="rclcpp_components",
         # Maybe it isn't worth having these multithreaded.
         executable="component_container_mt",
-        composable_node_descriptions=[
+        composable_node_descriptions=([
+            ComposableNode(
+                package="moveit_servo",
+                plugin="moveit_servo::ServoNode",
+                name="servo_node",
+                parameters=[
+                    servo_params,
+                    robot_description,
+                    robot_description_semantic,
+                    moveit_panda_config.robot_description_kinematics,
+                    moveit_panda_config.joint_limits,
+                ],
+            ),
+        ] if arm_type == "panda" else []) + [
             ComposableNode(
                 package="robot_state_publisher",
                 plugin="robot_state_publisher::RobotStatePublisher",
@@ -171,6 +207,7 @@ def generate_launch_description():
                 package="project",
                 plugin="project::Controller",
                 name="controller",
+                parameters=[{"frame": frame}],
             ),
             ComposableNode(
                 package="project",
@@ -181,18 +218,17 @@ def generate_launch_description():
                 package="tf2_ros",
                 plugin="tf2_ros::StaticTransformBroadcasterNode",
                 name="static_tf2_broadcaster",
-                parameters=[{"child_frame_id": "base_link", "frame_id": "/world"}],
+                parameters=[{"child_frame_id": frame, "frame_id": "/world"}],
             ),
         ],
         output="screen",
     )
 
     return LaunchDescription(
-        [
-            # rviz_node,
-            # ros2_control_node,
-            # joint_state_broadcaster_spawner,
-            # panda_arm_controller_spawner,
-            container,
-        ]
+        ([
+            rviz_node,
+            ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
+        ] if arm_type == "panda" else []) + [container]
     )

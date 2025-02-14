@@ -16,6 +16,7 @@
   <depend>ur_description</depend>
   <depend>moveit_servo</depend>
   <depend>moveit_resources_panda</depend>
+  <depend>moveit_resources_panda_moveit_config</depend>
   <depend>robot_state_publisher</depend>
   <depend>tf2_ros</depend>
 
