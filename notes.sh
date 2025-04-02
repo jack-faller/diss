@@ -11,3 +11,6 @@ ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=ur3e launch_rviz:=true
 # to build
 colcon build --mixin debug
 ros2 launch project project.launch.py
+
+ros2 launch kinova_gen3_lite_moveit_config robot.launch.py robot_ip:=192.168.1.10 use_fake_hardware:=true
+ros2 launch project project.launch.py

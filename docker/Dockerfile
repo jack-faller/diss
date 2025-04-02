@@ -1,5 +1,6 @@
-FROM ros:humble
 ARG ROS_DISTRO=humble
+FROM ros:$ROS_DISTRO
+
 ARG USERNAME=jack
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
@@ -10,8 +11,8 @@ RUN if id -u $USER_UID ; then userdel `id -un $USER_UID` ; fi
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
-# [Optional] Add sudo support. Omit if you don't need to install software after connecting.
-RUN apt-get update
+RUN apt-get clean && apt-get update
+# Add sudo support
 RUN apt-get install -y sudo
 RUN echo $USERNAME ALL=\(ALL\) NOPASSWD: ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
@@ -20,7 +21,7 @@ RUN apt-get install -y python3-pip python3-vcstools clangd clang-format socat ap
 
 USER $USERNAME
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
-ADD ./ws_$ROS_DISTRO/src /src-for-rosdep
+ADD ./src /src-for-rosdep
 SHELL ["/bin/bash", "-c"]
 USER root
 RUN addgroup realtime \
@@ -37,12 +38,29 @@ USER $USERNAME
 RUN echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc \
     && echo "export ROS_DISTRO=$ROS_DISTRO" >> ~/.bashrc \
     && echo 'source /proj/ws_$ROS_DISTRO/install/setup.bash' >> ~/.bashrc
-RUN rosdep update \
-	&& rosdep install -r --from-paths /src-for-rosdep --rosdistro $ROS_DISTRO -y
-# RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-# RUN colcon mixin update default
-# TODO: specify this as dependency with rosdep/catkin.
-RUN sudo apt-get install -y qtwayland5 ros-$ROS_DISTRO-ur ros-$ROS_DISTRO-rqt-controller-manager ros-$ROS_DISTRO-ros2controlcli ros-$ROS_DISTRO-ros2controlcli libeigen3-dev
+
+RUN rosdep update --rosdistro $ROS_DISTRO \
+	&& rosdep install -r -y --rosdistro $ROS_DISTRO --from-paths /src-for-rosdep
+	# ros-$ROS_DISTRO-kortex-bringup \
+	# ros-$ROS_DISTRO-kortex-driver \
+	# ros-$ROS_DISTRO-kortex-description \
+# RUN sudo apt-get install -y \
+# 	ros-$ROS_DISTRO-ament-cmake \
+# 	ros-$ROS_DISTRO-rclcpp \
+# 	ros-$ROS_DISTRO-rclcpp-components \
+# 	ros-$ROS_DISTRO-ros-gz-bridge \
+# 	ros-$ROS_DISTRO-ros-gz-sim \
+# 	ros-$ROS_DISTRO-moveit-servo \
+# 	ros-$ROS_DISTRO-robot-state-publisher \
+# 	ros-$ROS_DISTRO-tf2-ros \
+# 	ros-$ROS_DISTRO-tf2-eigen \
+# 	ros-$ROS_DISTRO-ros2launch \
+# 	ros-$ROS_DISTRO-ament-lint-auto \
+# 	ros-$ROS_DISTRO-ament-lint-common
+
+# RUN source /opt/ros/$ROS_DISTRO/setup.bash \
+# 	&& colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && colcon mixin update default
+RUN sudo apt-get install -y qtwayland5 ros-$ROS_DISTRO-moveit-setup-assistant # ros-$ROS_DISTRO-rqt-controller-manager ros-$ROS_DISTRO-ros2controlcli ros-$ROS_DISTRO-ros2controlcli
 ENV SHELL /bin/bash
 
 # ********************************************************

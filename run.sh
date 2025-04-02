@@ -8,6 +8,6 @@ docker run --name dis --volume "$(pwd):/proj" --rm --interactive --tty --detach 
 	   --env CLANG_PORT=$CLANG_PORT \
        --env DISPLAY="$DISPLAY" \
 	   --env QT_X11_NO_MITSHM=1 \
-	   ros_humble
+	   ros_$(./get-ros-version.sh)
 docker exec --workdir /proj --detach \
 	   dis socat tcp-listen:$CLANG_PORT,reuseaddr,fork exec:clangd

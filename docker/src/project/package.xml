@@ -11,14 +11,22 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
-  <depend>ur_moveit_config</depend>
-  <depend>ur_robot_driver</depend>
-  <depend>ur_description</depend>
+  <depend>kortex_bringup</depend>
+  <depend>kortex_driver</depend>
+  <depend>kortex_description</depend>
+  <depend>ros_gz_bridge</depend>
+  <depend>ros_gz_sim</depend>
+  <!-- <depend>kinova_gen3_lite_moveit_config</depend> -->
+  <!-- <depend>ur</depend> -->
+  <!-- <depend>ur_moveit_config</depend> -->
+  <!-- <depend>ur_robot_driver</depend> -->
+  <!-- <depend>ur_description</depend> -->
   <depend>moveit_servo</depend>
-  <depend>moveit_resources_panda</depend>
-  <depend>moveit_resources_panda_moveit_config</depend>
+  <!-- <depend>moveit_resources_panda</depend> -->
+  <!-- <depend>moveit_resources_panda_moveit_config</depend> -->
   <depend>robot_state_publisher</depend>
   <depend>tf2_ros</depend>
+  <depend>tf2_eigen</depend>
 
   <exec_depend>ros2launch</exec_depend>
 

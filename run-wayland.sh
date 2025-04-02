@@ -13,7 +13,7 @@ docker run --name dis --volume "$(pwd):/proj" --rm --interactive --tty --detach 
        --env QT_QPA_PLATFORM="$QT_QPA_PLATFORM" \
        --env QT_QPA_PLATFORM_THEME="$QT_QPA_PLATFORM_THEME" \
 	   --user $(id -u):$(id -g) \
-	   ros_humble bash
+	   ros_$(./get-ros-version.sh) bash
 echo 3
 docker exec --workdir /proj --detach \
 	   dis socat tcp-listen:$CLANG_PORT,reuseaddr,fork exec:clangd
