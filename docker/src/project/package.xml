@@ -16,7 +16,7 @@
   <depend>kortex_description</depend>
   <depend>ros_gz_bridge</depend>
   <depend>ros_gz_sim</depend>
-  <!-- <depend>kinova_gen3_lite_moveit_config</depend> -->
+  <depend>kinova_gen3_lite_moveit_config</depend>
   <!-- <depend>ur</depend> -->
   <!-- <depend>ur_moveit_config</depend> -->
   <!-- <depend>ur_robot_driver</depend> -->

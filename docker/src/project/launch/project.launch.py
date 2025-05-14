@@ -25,48 +25,14 @@ class RobotDescription:
         self.kinematics = kinematics
 
 def generate_launch_description():
-    frame = "link0"
-
-    moveit_config = (
-        MoveItConfigsBuilder("kinova_gen3_lite")
-        .robot_description(file_path="config/gen3_lite.urdf.xacro")
-        .to_moveit_configs())
-    servo_params = { "moveit_servo": ParameterBuilder("kortex_bringup", "config/servo.yaml") }
-    # ros2_controllers_path = (
-    #     get_package_share_directory("kortex_moveit_config") + "kinova_gen3_lite_moveit_config/config/ros2_controllers.yaml"
-    # )
-
-    # ros2_control_node = Node(
-    #     package="controller_manager",
-    #     executable="ros2_control_node",
-    #     parameters=[robot_description, ros2_controllers_path],
-    #     remappings=[
-    #         ("/controller_manager/robot_description", "/robot_description"),
-    #     ],
-    #     output="screen",
-    # )
-
-    # joint_state_broadcaster_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=[
-    #         "joint_state_broadcaster",
-    #         "--controller-manager-timeout",
-    #         "300",
-    #         "--controller-manager",
-    #         "/controller_manager",
-    #     ],
-    # )
-
-    # panda_arm_controller_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["kortex_arm_controller", "-c", "/controller_manager"],
-    # )
-
+    moveit_config = MoveItConfigsBuilder("kinova_gen3_lite").to_moveit_configs()
+    servo_yaml = load_yaml("kortex_bringup", "config/servo.yaml")
+    # This is set to "manipulator" by default for some reason.
+    # servo_yaml['move_group_name'] = 'gripper'
+    servo_params = { "moveit_servo": servo_yaml }
     # Launch as much as possible in components
     container = ComposableNodeContainer(
-        name="moveit_servo_demo_container",
+        name="container",
         namespace="/",
         package="rclcpp_components",
         # Maybe it isn't worth having these multithreaded.
@@ -77,6 +43,7 @@ def generate_launch_description():
                 plugin="moveit_servo::ServoNode",
                 name="servo_node",
                 parameters=[
+                    # {'use_intra_process_comms': True},
                     servo_params,
                     moveit_config.robot_description,
                     moveit_config.robot_description_semantic,
@@ -84,17 +51,18 @@ def generate_launch_description():
                     moveit_config.joint_limits,
                 ],
             ),
-            ComposableNode(
-                package="robot_state_publisher",
-                plugin="robot_state_publisher::RobotStatePublisher",
-                name="robot_state_publisher",
-                parameters=[robot_description],
-            ),
+            # ComposableNode(
+            #     package="robot_state_publisher",
+            #     plugin="robot_state_publisher::RobotStatePublisher",
+            #     name="robot_state_publisher",
+            #     parameters=[moveit_config.robot_description],
+            # ),
+
             ComposableNode(
                 package="project",
                 plugin="project::Controller",
                 name="controller",
-                parameters=[{"frame": frame}],
+                parameters=[{"frame": servo_yaml['planning_frame']}],
             ),
             ComposableNode(
                 package="project",
@@ -105,17 +73,28 @@ def generate_launch_description():
                 package="tf2_ros",
                 plugin="tf2_ros::StaticTransformBroadcasterNode",
                 name="static_tf2_broadcaster",
-                parameters=[{"child_frame_id": frame, "frame_id": "/world"}],
+                parameters=[{"child_frame_id": servo_yaml['planning_frame'], "frame_id": "/world"}],
             ),
         ],
         output="screen",
     )
-
     return LaunchDescription(
-        kinova_nodes + [
+        [
             # ros2_control_node,
             # joint_state_broadcaster_spawner,
             # panda_arm_controller_spawner,
-            container,
+
+            # container,
+            Node(package="moveit_servo",
+        executable="servo_node_main",
+        name="servo_node",
+        parameters=[
+            servo_params,
+            moveit_config.robot_description,
+            moveit_config.robot_description_semantic,
+            moveit_config.robot_description_kinematics,
+            moveit_config.joint_limits,
+        ],
+        output="screen",)
         ]
     )
