@@ -73,12 +73,12 @@
 			  body: value.toString(),
 		  });
 	  }
-	  function hold_button(id, command) {
+	  function hold_button(id, cmd) {
 		  let button = document.querySelector(id);
 		  ['mousedown', 'touchstart'].forEach(e =>
-			  hold.addEventListener(e, ignore => command(command, 1)));
+			  button.addEventListener(e, ignore => command(cmd, 1)));
 		  ['mouseup', 'touchend'].forEach(e =>
-			  hold.addEventListener(e, ignore => command(command, 0)));
+			  button.addEventListener(e, ignore => command(cmd, 0)));
 	  }
 	  function radio_check() {
 		  command(document.querySelector('input[name="input_type"]:checked').value, 1);
