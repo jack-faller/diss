@@ -3,7 +3,7 @@ CLANG_PORT=1222
 set -evo pipefail
 	   # --expose $CLANG_PORT \
 	   # --network=host --privileged \
-docker run --name dis --volume "$(pwd):/proj" --rm --interactive --tty --detach \
+docker run --name dis --volume "$(pwd):/proj" --iteractive --tty --detach \
        --env XDG_RUNTIME_DIR=/tmp \
 	   --volume /tmp/.X11-unix:/tmp/.X11-unix \
        --env WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \

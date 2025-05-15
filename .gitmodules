@@ -1,0 +1,3 @@
+[submodule "jaka_ros2"]
+	path = jaka_ros2
+	url = git@github.com:JakaCobot/jaka_ros2.git

@@ -45,7 +45,7 @@ public:
     this->declare_parameter("frame", rclcpp::PARAMETER_STRING);
     frame_to_publish = this->get_parameter("frame").as_string();
 
-    RCLCPP_INFO(get_logger(), "STARTED %d", 4);
+    RCLCPP_INFO(get_logger(), "STARTED publishing on %s", frame_to_publish.c_str());
     twist_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
     collision_pub =
       this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", rclcpp::SystemDefaultsQoS());

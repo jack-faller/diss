@@ -60,8 +60,12 @@ RUN rosdep update --rosdistro $ROS_DISTRO \
 
 # RUN source /opt/ros/$ROS_DISTRO/setup.bash \
 # 	&& colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && colcon mixin update default
-RUN sudo apt-get install -y qtwayland5 ros-$ROS_DISTRO-moveit-setup-assistant # ros-$ROS_DISTRO-rqt-controller-manager ros-$ROS_DISTRO-ros2controlcli ros-$ROS_DISTRO-ros2controlcli
+RUN sudo apt-get install -y qtwayland5 ros-$ROS_DISTRO-moveit-setup-assistant  # ros-$ROS_DISTRO-rqt-controller-manager ros-$ROS_DISTRO-ros2controlcli ros-$ROS_DISTRO-ros2controlcli
 ENV SHELL /bin/bash
+
+RUN sudo apt-get install -y ros-humble-moveit-visual-tools
+ADD ../jaka_ros2 /jaka_ros2
+RUN echo "source /jaka_ros2/src/setup.bash" >> ~/.bashrc
 
 # ********************************************************
 # * Anything else you want to do like clean up goes here *

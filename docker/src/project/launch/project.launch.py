@@ -84,17 +84,17 @@ def generate_launch_description():
             # joint_state_broadcaster_spawner,
             # panda_arm_controller_spawner,
 
-            # container,
-            Node(package="moveit_servo",
-        executable="servo_node_main",
-        name="servo_node",
-        parameters=[
-            servo_params,
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
-            moveit_config.joint_limits,
-        ],
-        output="screen",)
-        ]
+            container,
+        #     Node(package="moveit_servo",
+        # executable="servo_node_main",
+        # name="servo_node",
+        # parameters=[
+        #     servo_params,
+        #     moveit_config.robot_description,
+        #     moveit_config.robot_description_semantic,
+        #     moveit_config.robot_description_kinematics,
+        #     moveit_config.joint_limits,
+        # ],
+        # output="screen",)
+        # ]
     )

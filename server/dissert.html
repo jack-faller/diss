@@ -80,21 +80,26 @@
 		  ['mouseup', 'touchend'].forEach(e =>
 			  hold.addEventListener(e, ignore => command(command, 0)));
 	  }
+	  function radio_check() {
+		  command(document.querySelector('input[name="input_type"]:checked').value, 1);
+	  }
 	  command("init", "0")
 	</script>
   </head>
   <body>
 	<div class="input-types">
-	  <input type="radio" id="position" name="input_type" value="position" checked='checked'>
+	  <input type="radio" onclick='radio_check()' id="position" name="input_type" value="position" checked='checked'>
 	  <label for="position">Position</label><br>
-	  <input type="radio" id="velocity" name="input_type" value="velocity">
+	  <input type="radio" onclick='radio_check()' id="velocity" name="input_type" value="velocity">
 	  <label for="velocity">Velocity</label><br>
 	</div>
 	<div class='hdiv'> <button type='button' id='reset'>Reset</button> </div>
 	<div class='hdiv'> <button type='button' id='lock'>Lock Speed</button> </div>
+	<div class='hdiv'> <button type='button' id='grab'>Grab</button> </div>
 	<script>
-	  reset_button('#reset', 'reset');
+	  hold_button('#reset', 'reset');
 	  hold_button('#lock', 'lock');
+	  hold_button('#grab', 'grab');
 	</script>
   </body>
 </html>
