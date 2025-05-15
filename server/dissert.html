@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<!-- Disable zoom. -->
+	<meta name="viewport" content="user-scalable=0"/>
+	<style>
+	  body {
+		  background-image: url(jackfaller.xyz/images/tiling_pattern.png);
+		  font-size: 23px;
+		  margin: 0px;
+		  background-attachment: fixed;
+		  quotes: "\201C" "\201D";
+		  display: flex;
+		  flex-direction: column;
+		  justify-content: center;
+		  padding-top: min(8vw, 50px);
+		  padding-bottom: min(8vw, 50px);
+	  }
+	  .hdiv, .input-types {
+		  display: flex;
+		  flex-direction: row;
+		  justify-content: space-evenly;
+	  }
+	  button, label {
+		  user-select: none;
+		  -webkit-user-select: none;
+		  -ms-user-select: none;
+		  width: 100%;
+		  height: 200px;
+		  margin: 30px;
+		  font-size: 80px;
+		  cursor: pointer;
+		  background: palegreen;
+		  border: 2px solid #CCC;
+	  }
+	  .input-types label {
+		  display: flex;
+		  align-items: center;
+		  justify-content: center;
+	  }
+	  button:hover, label:hover {
+		  background: #DDD;
+	  }
+	  button:active,
+	  .input-types input[type="radio"]:checked+label,
+	  .Checked+label {
+		  background: #AAA;
+	  }
+	  .input-types li {
+		  float: left;
+		  margin: 0 5px 0 0;
+		  width: 100px;
+		  height: 40px;
+		  position: relative;
+	  }
+
+	  .input-types input[type="radio"] {
+		  display: none;
+	  }
+
+	  .input-types label {
+		  padding: 5px;
+		  z-index: 90;
+	  }
+	</style>
+	<script>
+	  function command(path, value) {
+		  fetch("/dissert/" + path, {
+			  method: "POST",
+			  headers: {
+				  "Content-type": "text/plain; charset=UTF-8"
+			  },
+			  body: value.toString(),
+		  });
+	  }
+	  function hold_button(id, command) {
+		  let button = document.querySelector(id);
+		  ['mousedown', 'touchstart'].forEach(e =>
+			  hold.addEventListener(e, ignore => command(command, 1)));
+		  ['mouseup', 'touchend'].forEach(e =>
+			  hold.addEventListener(e, ignore => command(command, 0)));
+	  }
+	  command("init", "0")
+	</script>
+  </head>
+  <body>
+	<div class="input-types">
+	  <input type="radio" id="position" name="input_type" value="position" checked='checked'>
+	  <label for="position">Position</label><br>
+	  <input type="radio" id="velocity" name="input_type" value="velocity">
+	  <label for="velocity">Velocity</label><br>
+	</div>
+	<div class='hdiv'> <button type='button' id='reset'>Reset</button> </div>
+	<div class='hdiv'> <button type='button' id='lock'>Lock Speed</button> </div>
+	<script>
+	  reset_button('#reset', 'reset');
+	  hold_button('#lock', 'lock');
+	</script>
+  </body>
+</html>
